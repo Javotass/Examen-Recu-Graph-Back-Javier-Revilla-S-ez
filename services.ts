@@ -37,32 +37,36 @@ export async function getCharacter(id: string): Promise<Character | null> {
 }
 
 export async function getCharacters(ids?: string[]): Promise<Character[]> {
-const allCharacters = await getAllCharacters();
-if (!ids || ids.length === 0) {
-return allCharacters;
+    const allCharacters = await getAllCharacters();
+    if (!ids || ids.length === 0) {
+        return allCharacters;
+    }
+    return allCharacters.filter(char => ids.includes(char.id));
 }
-return allCharacters.filter(char => ids.includes(char.id));
-}
+
 export async function getHouse(houseName: string): Promise<House | null> {
-const normalizedName = houseName.toLowerCase();
-if (!HOUSES.includes(normalizedName)) {
-return null;
-}
-const hpCharacters = await fetchFromAPI(`/characters/house/${normalizedName}`);
-if (!hpCharacters) return null;
-const characters = hpCharacters.map(transformHPCharacter);
-const house: House = {
-name: normalizedName.charAt(0).toUpperCase() + normalizedName.slice(1),
-characters
-};
-return house;
+    const normalizedName = houseName.toLowerCase();
+    if (!HOUSES.includes(normalizedName)) {
+        return null;
+    }
+
+    const hpCharacters = await fetchFromAPI(`/characters/house/${normalizedName}`);
+    if (!hpCharacters) return null;
+
+    const characters = hpCharacters.map(transformHPCharacter);
+    
+    const house: House = {
+        name: normalizedName.charAt(0).toUpperCase() + normalizedName.slice(1),
+        characters
+    };
+    return house;
 }
 export async function getCharacterHouse(character: Character): Promise<House | null> {
-for (const houseName of HOUSES) {
-const house = await getHouse(houseName);
-if (house && house.characters.some(char => char.id === character.id)) {
-return house;
-}
-}
+    for (const houseName of HOUSES) {
+        const house = await getHouse(houseName);
+    if (house && house.characters.some(char => char.id === character.id)) {
+        return house;
+    }
+    }
 return null;
 }
